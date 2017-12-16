@@ -1,6 +1,17 @@
 # go-gunzip-bench
 
-Benchmark multiple ways of decompressing a `gzip` file in golang.
+Benchmark multiple ways of decompressing a `gzip` file in golang.  
+
+Published as a support for https://github.com/golang/go/issues/23154
+
+## Test configuration
+```sh
+$ grep -m 1 'model name' /proc/cpuinfo
+model name      : Intel(R) Core(TM) i7-5930K CPU @ 3.50GHz
+
+$ go version
+go version go1.9.2 linux/amd64
+```
 
 ## Preparation
 ```sh
@@ -12,9 +23,6 @@ $ sudo mount -t tmpfs tmpfs tmp/
 
 $ wget -nv https://developer.download.nvidia.com/compute/redist/cudnn/v7.0.5/cudnn-9.0-linux-x64-v7.tgz -O tmp/cudnn.tgz
 2017-12-15 18:03:22 URL:https://developer.download.nvidia.com/compute/redist/cudnn/v7.0.5/cudnn-9.0-linux-x64-v7.tgz [348817823/348817823] -> "tmp/cudnn.tgz" [1]
-
-$ grep -m 1 'model name' /proc/cpuinfo
-model name      : Intel(R) Core(TM) i7-5930K CPU @ 3.50GHz
 
 # Note: we use `runtime.GOMAXPROCS(1)`
 $ echo performance | sudo tee /sys/devices/system/cpu/cpu*/cpufreq/scaling_governor
@@ -41,7 +49,7 @@ tmp/cudnn.tgz:  7.84219111s
 
 ## [Method 2](https://github.com/flx42/go-gunzip-bench/blob/master/main.go#L58-L72)
 Read the whole file in-memory, stream decompress/write to output file.
-```
+```sh
 $ ./go-gunzip-bench 2 tmp/cudnn.tgz
 tmp/cudnn.tgz:  7.692913915s
 
