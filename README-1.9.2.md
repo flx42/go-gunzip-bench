@@ -13,7 +13,7 @@ $ uname -a
 Linux name 4.15.0-29-generic #31-Ubuntu SMP Tue Jul 17 15:39:52 UTC 2018 x86_64 x86_64 x86_64 GNU/Linux
 
 $ go version
-go version go1.11beta2 linux/amd64
+go version go1.9.2 linux/amd64
 ```
 
 ## Preparation
@@ -36,7 +36,7 @@ performance
 Don't use "compress/gzip", pipe to gunzip(1)
 ```sh
 $ ./go-gunzip-bench 0 tmp/cudnn.tgz
-tmp/cudnn.tgz:  4.915795273s
+tmp/cudnn.tgz:  4.984561015s
 
 36b429f6f780ab46d6dfd5888918968cd5882ef6b6f4cbd97d596a2da211a4c7  tmp/cudnn.tar
 ```
@@ -45,7 +45,7 @@ tmp/cudnn.tgz:  4.915795273s
 Chain two readers, low memory usage, most idiomatic solution
 ```sh
 $ ./go-gunzip-bench 1 tmp/cudnn.tgz
-tmp/cudnn.tgz:  6.892494625s
+tmp/cudnn.tgz:  8.071388531s
 
 36b429f6f780ab46d6dfd5888918968cd5882ef6b6f4cbd97d596a2da211a4c7  tmp/cudnn.tar
 ```
@@ -54,7 +54,7 @@ tmp/cudnn.tgz:  6.892494625s
 Read the whole file in-memory, stream decompress/write to output file.
 ```sh
 $ ./go-gunzip-bench 2 tmp/cudnn.tgz
-tmp/cudnn.tgz:  6.903480461s
+tmp/cudnn.tgz:  7.783154566s
 
 36b429f6f780ab46d6dfd5888918968cd5882ef6b6f4cbd97d596a2da211a4c7  tmp/cudnn.tar
 ```
@@ -63,7 +63,7 @@ tmp/cudnn.tgz:  6.903480461s
 Read the whole file in-memory, and decompress the whole file in-memory.
 ```sh
 $ ./go-gunzip-bench 3 tmp/cudnn.tgz
-tmp/cudnn.tgz:  7.735190816s
+tmp/cudnn.tgz:  8.371608544s
 
 36b429f6f780ab46d6dfd5888918968cd5882ef6b6f4cbd97d596a2da211a4c7  tmp/cudnn.tar
 ```
@@ -71,8 +71,8 @@ tmp/cudnn.tgz:  7.735190816s
 ## [Method 4](https://github.com/flx42/go-gunzip-bench/blob/master/main.go#L89-L104)
 Method 1 but using [cgzip](https://github.com/youtube/vitess/tree/master/go/cgzip), a golang wrapper for [zlib](https://www.zlib.net) (using cgo).
 ```sh
-$ ./go-gunzip-bench 4 tmp/cudnn.tgz
-tmp/cudnn.tgz:  3.426593085s
+./go-gunzip-bench 4 tmp/cudnn.tgz
+tmp/cudnn.tgz:  3.338733633s
 
 36b429f6f780ab46d6dfd5888918968cd5882ef6b6f4cbd97d596a2da211a4c7  tmp/cudnn.tar
 ```
@@ -81,7 +81,7 @@ tmp/cudnn.tgz:  3.426593085s
 Method 1 but using [pgzip](https://github.com/klauspost/pgzip).
 ```sh
 $ ./go-gunzip-bench 5 tmp/cudnn.tgz
-tmp/cudnn.tgz:  6.922467413s
+tmp/cudnn.tgz:  6.917987026s
 
 36b429f6f780ab46d6dfd5888918968cd5882ef6b6f4cbd97d596a2da211a4c7  tmp/cudnn.tar
 ```
