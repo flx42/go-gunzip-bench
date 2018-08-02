@@ -9,6 +9,9 @@ Published as a support for https://github.com/golang/go/issues/23154
 $ grep -m 1 'model name' /proc/cpuinfo
 model name      : Intel(R) Core(TM) i7-5930K CPU @ 3.50GHz
 
+$ uname -a
+Linux name 4.15.0-29-generic #31-Ubuntu SMP Tue Jul 17 15:39:52 UTC 2018 x86_64 x86_64 x86_64 GNU/Linux
+
 $ go version
 go version go1.9.2 linux/amd64
 ```
@@ -29,38 +32,38 @@ $ echo performance | sudo tee /sys/devices/system/cpu/cpu*/cpufreq/scaling_gover
 performance
 ```
 
-## [Method 0](https://github.com/flx42/go-gunzip-bench/blob/master/main.go#L25-L39)
+## [Method 0](https://github.com/flx42/go-gunzip-bench/blob/master/main.go#L26-L40)
 Don't use "compress/gzip", pipe to gunzip(1)
 ```sh
 $ ./go-gunzip-bench 0 tmp/cudnn.tgz
-tmp/cudnn.tgz:  4.426812529s
+tmp/cudnn.tgz:  4.984561015s
 
 36b429f6f780ab46d6dfd5888918968cd5882ef6b6f4cbd97d596a2da211a4c7  tmp/cudnn.tar
 ```
 
-## [Method 1](https://github.com/flx42/go-gunzip-bench/blob/master/main.go#L41-L56)
+## [Method 1](https://github.com/flx42/go-gunzip-bench/blob/master/main.go#L42-L57)
 Chain two readers, low memory usage, most idiomatic solution
 ```sh
 $ ./go-gunzip-bench 1 tmp/cudnn.tgz
-tmp/cudnn.tgz:  7.84219111s
+tmp/cudnn.tgz:  8.071388531s
 
 36b429f6f780ab46d6dfd5888918968cd5882ef6b6f4cbd97d596a2da211a4c7  tmp/cudnn.tar
 ```
 
-## [Method 2](https://github.com/flx42/go-gunzip-bench/blob/master/main.go#L58-L72)
+## [Method 2](https://github.com/flx42/go-gunzip-bench/blob/master/main.go#L59-L73)
 Read the whole file in-memory, stream decompress/write to output file.
 ```sh
 $ ./go-gunzip-bench 2 tmp/cudnn.tgz
-tmp/cudnn.tgz:  7.692913915s
+tmp/cudnn.tgz:  7.783154566s
 
 36b429f6f780ab46d6dfd5888918968cd5882ef6b6f4cbd97d596a2da211a4c7  tmp/cudnn.tar
 ```
 
-## [Method 3](https://github.com/flx42/go-gunzip-bench/blob/master/main.go#L75-L87)
+## [Method 3](https://github.com/flx42/go-gunzip-bench/blob/master/main.go#L76-L88)
 Read the whole file in-memory, and decompress the whole file in-memory.
 ```sh
 $ ./go-gunzip-bench 3 tmp/cudnn.tgz
-tmp/cudnn.tgz:  7.941778804s
+tmp/cudnn.tgz:  8.371608544s
 
 36b429f6f780ab46d6dfd5888918968cd5882ef6b6f4cbd97d596a2da211a4c7  tmp/cudnn.tar
 ```
@@ -69,7 +72,16 @@ tmp/cudnn.tgz:  7.941778804s
 Method 1 but using [cgzip](https://github.com/youtube/vitess/tree/master/go/cgzip), a golang wrapper for [zlib](https://www.zlib.net) (using cgo).
 ```sh
 $ ./go-gunzip-bench 4 tmp/cudnn.tgz
-tmp/cudnn.tgz:  3.403516352s
+tmp/cudnn.tgz:  3.338733633s
+
+36b429f6f780ab46d6dfd5888918968cd5882ef6b6f4cbd97d596a2da211a4c7  tmp/cudnn.tar
+```
+
+## [Method 5](https://github.com/flx42/go-gunzip-bench/blob/master/main.go#L90-L105)
+Method 1 but using [pgzip](https://github.com/klauspost/pgzip).
+```sh
+$ ./go-gunzip-bench 5 tmp/cudnn.tgz
+tmp/cudnn.tgz:  6.917987026s
 
 36b429f6f780ab46d6dfd5888918968cd5882ef6b6f4cbd97d596a2da211a4c7  tmp/cudnn.tar
 ```
@@ -78,8 +90,8 @@ tmp/cudnn.tgz:  3.403516352s
 `gunzip(1)` for read, decompress, write.
 ```sh
 $ /usr/bin/time gunzip --keep --force tmp/cudnn.tgz && sha256sum tmp/cudnn.tar
-4.21user 0.21system 0:04.42elapsed 99%CPU (0avgtext+0avgdata 1788maxresident)k
-0inputs+0outputs (0major+157minor)pagefaults 0swaps
+4.73user 0.14system 0:04.88elapsed 100%CPU (0avgtext+0avgdata 1824maxresident)k
+0inputs+0outputs (0major+156minor)pagefaults 0swaps
 36b429f6f780ab46d6dfd5888918968cd5882ef6b6f4cbd97d596a2da211a4c7  tmp/cudnn.tar
 ```
 

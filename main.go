@@ -3,8 +3,9 @@ package main
 import (
 	"bytes"
 	"compress/gzip"
-	"github.com/youtube/vitess/go/cgzip"
 	"fmt"
+	"github.com/klauspost/pgzip"
+	"github.com/youtube/vitess/go/cgzip"
 	"io"
 	"io/ioutil"
 	"log"
@@ -103,6 +104,23 @@ func method4(dst, src string) {
 	check(err)
 }
 
+// Method 5: Method 1 but using pgzip: https://github.com/klauspost/pgzip
+func method5(dst, src string) {
+	f, err := os.Open(src)
+	check(err)
+	defer f.Close()
+
+	r, err := pgzip.NewReader(f)
+	check(err)
+
+	w, err := os.Create(dst)
+	check(err)
+	defer w.Close()
+
+	_, err = io.Copy(w, r)
+	check(err)
+}
+
 func warmPageCache(path string) {
 	f, err := os.OpenFile(os.DevNull, os.O_WRONLY, 0)
 	check(err)
@@ -149,6 +167,8 @@ func main() {
 		method3(dst, src)
 	case 4:
 		method4(dst, src)
+	case 5:
+		method5(dst, src)
 	default:
 		os.Exit(2)
 	}
